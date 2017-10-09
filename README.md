@@ -7,7 +7,7 @@
 
 ### Принцип работы посредника 
 *Краткое описание:*
-Принцип работы посредника устроен на вызове функции JS из Flash'a и наоборот. Это достигается за счёт методов класса [**ExternalInterface.**](http://help.adobe.com/ru_RU/FlashPlatform/reference/actionscript/3/flash/external/ExternalInterface.html)
+Принцип работы посредника построен на вызове функции JS из Flash'a и наоборот. Это достигается за счёт методов класса [**ExternalInterface.**](http://help.adobe.com/ru_RU/FlashPlatform/reference/actionscript/3/flash/external/ExternalInterface.html)
 В свою очередь, JS взаимодействуют с [**JavaScript SDK**](https://vk.com/dev/Javascript_SDK), которую предоставляет социальная сеть. 
 В html страницу объект-flash встраивается по средствам [**swfObject.**](https://habrahabr.ru/post/31615/)
 
@@ -65,7 +65,7 @@ if(_VK.eiConnectStatus == "WORKING"){
 
 Это событие может произойти только один раз - при инициализации. Поэтому слушать его, кроме как в этом случае, не надо.
 
-[**Параметры запуска приложений (flashVars)**](https://vk.com/dev/apps_init)    
+###[Параметры запуска приложений (flashVars)](https://vk.com/dev/apps_init)    
 Данные, полученные при запуске приложения, передаются во flash через **flashVars**. Получить их можно также, как при использовании Flash SDK.
 ```as
 //as code
@@ -82,7 +82,6 @@ var _flashVars: Object = stage.loaderInfo.parameters as Object;
 * Если приложение использовало не актуальную версию API, например 3.0, нужно изменить эту версию в JavaScript SDK. Указание версии производится в файле *vkapi.js*.
 ```js
 //js code
-//string 9
-}, '5.68'); 
+}, '5.68'); //string 9
 ```
 Вероятно, это решит проблему не корректной работы приложения, и не будет необходимости, изменять в нем названия/аргументы методов API.
