@@ -207,7 +207,7 @@
 			{
 				_dispatchFunction(CustomEvent.ON_EI_INIT_END, {connectState:"WORKING"});
 			} else if(currentState == NOT_WORK) {
-				_dispatchFunction(CustomEvent.ON_EI_INIT_END, {connectState:"NOT_WORKING"});
+				_dispatchFunction(CustomEvent.ON_EI_INIT_END, {connectState:"NOT_WORK"});
 			}
 			
 			_currentState = currentState;
