@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> 
+    <head>
+        <title>ExternalInterface Testing</title>
+        <meta name="google" value="notranslate"/>         
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+        <style type="text/css" media="screen"> 
+            html, body  { height:100%; }
+            body { margin:0; padding:0; overflow:auto; text-align:center; 
+                   background-color: #ffffff; }   
+            object:focus { outline:none; }
+            #flashContent { display:none; }
+        </style>
+            
+        <script type="text/javascript" src="swfobject.js"></script>
+        <script type="text/javascript">
+            // Считываем пользовательские данные. Тоже самое, что flashVars.
+            var partsData = document.location.search.substr(1).split("&");//Дробим информацию на части.
+            var userDataVk = {}, currentData;
+            for (i = 0; i < partsData.length; i++) {
+                currentData = partsData[i].split('=');//Дробим данные на ключ - значения
+                userDataVk[currentData[0]] = currentData[1];//Записываем ключи и их значения
+            }
+            // For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
+            var swfVersionStr = "11.1.0";
+            // To use express install, set to playerProductInstall.swf, otherwise the empty string. 
+            var xiSwfUrlStr = "";
+            var flashvars = userDataVk;
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#FFFFFF";
+            params.allowscriptaccess = "always";
+            params.allowfullscreen = "true";
+            params.wmode = "opaque";
+            var attributes = {};
+            attributes.id = "ExtIntProf";
+            attributes.name = "ExtIntProf";
+            attributes.align = "middle";
+            swfobject.embedSWF(
+                "ExtIntProf.swf?" + Math.random(), "flashContent", 
+                "550", "400", 
+                swfVersionStr, xiSwfUrlStr, 
+                flashvars, params, attributes);
+            // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
+            swfobject.createCSS("#flashContent", "display:block;text-align:left;");
+        </script>
+    </head>
+    
+    <body>
+        <div id="flashContent">
+            <p>
+                To view this page ensure that Adobe Flash Player version 11.1.0 or greater is installed. 
+            </p>
+            <script type="text/javascript"> 
+                var pageHost = ((document.location.protocol == "https:") ? "https://" : "http://"); 
+                document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='" 
+                                + pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" ); 
+            </script> 
+        </div>
+
+        <script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
+        <!-- // <script src="vkapi.js?3"  type="text/javascript"></script>]> -->
+        <script type="text/javascript">
+            document.write('<script src="vkapi.js?' + Math.random() + '"></scr' + 'ipt>');
+        </script>
+
+        <script language="JavaScript"> 
+            var jsReady = false;
+            var asReady = false;
+            var apiReady = 0;//0 - не готов, 1 - готов, 2 - ошибка;
+
+            function isReady(unit) {
+                if(unit == "JS"){
+                    return jsReady;  
+                } else if(unit == "API"){
+                    return apiReady;
+                }   
+            }
+
+            function readySet(unit, errors) {
+                if(unit == "JS"){
+                    jsReady = true;
+                    console.log("JavaScript is ready.\n");
+                    //JS готов, инициализируем vkApi
+                    vkApiInit();
+                } else if (unit == "AS"){
+                    asReady = true;
+                    console.log("ActionScript is ready.\n");
+                } else if (unit == "API"){
+                    // Пришло сообщение об ошибке
+                    if(errors == false){ // Нет, ошибок нет
+                        apiReady = 1;//Присваиваем значение, 1 - готов
+                        console.log("Api Vk is ready.\n");
+                    } else if (errors == true){ // Да, ошибки есть
+                        apiReady = 2;// 2 - ошибка
+                        console.log("Api Vk has errors.\n");
+                    }
+                }
+            }
+
+            //Что JS отправит AS'ту
+            function sendToActionScript(value) {
+                // 
+                console.log(value);
+                // 
+                document.getElementById("ExtIntProf").sendToActionScript(value);
+            }
+
+            //Что AS отправил JS'у
+            function sendToJavaScript(value) {
+                // 
+                // console.log("ActionScript says: " + value.callType + "\n");
+                // 
+                if(value.callType == "vkMethodCall"){
+                    apiMethods(value.methodName, value.methodParams, value.callId, value.callType);
+                }else if(value.callType == "vkClientApiCall"){
+                    clientAPI(value.methodName, value.methodParams);
+                }else if(value.callType == "vkClientApiEvent"){
+                    clientAPICallBackControl(value.methodName, value.controlType);
+                }
+            }
+
+            window.onLoad = readySet("JS");
+    	</script>
+    </body>
+</html>
