@@ -10,6 +10,7 @@
 			_vkMethodSendParams = vkMethodSendParams;
 		}
 
+
 		//Смотрим, что пришло в ответ, на вызов метода
 		public function reviewData(data:Object)
 		{
