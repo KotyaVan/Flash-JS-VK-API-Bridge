@@ -84,18 +84,18 @@
 				eiSuccessInit();
 			} else if(_VK.eiConnectStatus == "NOT_WORK"){
 				//Посредник не работает по какой либо причине.Это окончательный статус, он не изменится. Причина непоказывается, но при желании можете вывести ее из экз. ExtIntClass
-				textDescriptions.appendText("Посредник ExternalInterface НЕ работает.\n");
+				textDescriptions.appendText("Посредник ExternalInterface не работает.\n");
 			} else if(_VK.eiConnectStatus == "CONNECTION"){
 				//Посредник еще не загрузился. В этом случае надо поставить слушатель на экз. _VK и слушать событие CustomEvent.ON_EI_INIT_END
 				textDescriptions.appendText("Посредник ExternalInterface не загрузился.\n");
-				//Событие приходит вместе с параметром connectState. Может быть WORKING - значить посредник инициализировался. NOT_WORKING - посредник не будет работать
+				//Событие приходит вместе с параметром connectState. Может быть WORKING - значить посредник инициализировался. NOT_WORK - посредник не будет работать
 				_VK.addEventListener(CustomEvent.ON_EI_INIT_END, function (event:CustomEvent){
 						if(event.params.connectState == "WORKING"){
 							textDescriptions.appendText("Посредник ExternalInterface загрузился. Можно работать с API.\n");
 							//Только теперь можем работать с API
 							eiSuccessInit();
 						}else{
-							textDescriptions.appendText("Посредник ExternalInterface НЕ работает.\n");
+							textDescriptions.appendText("Посредник ExternalInterface не работает.\n");
 						}
 						_VK.removeEventListener(CustomEvent.ON_EI_INIT_END, arguments.callee);
 				})
@@ -107,10 +107,10 @@
 		{
 			//Данные пользователя из flashVars доступны сразу, если они есть. Дожидаться иниц посредника, чтобы работать с ними, не обязательно.
 			textDescriptions.appendText("Ваши данные из flashVars\n");
-        	textDescriptions.appendText("api_id = " + _flashVars['api_id'] + "\n");
-        	textDescriptions.appendText("viewer_id = " + _flashVars['viewer_id'] + "\n");
-        	textDescriptions.appendText("sid = " + _flashVars['sid'] + "\n");
-        	textDescriptions.appendText("secret = " + _flashVars['secret'] + "\n");
+			textDescriptions.appendText("api_id = " + _flashVars['api_id'] + "\n");
+			textDescriptions.appendText("viewer_id = " + _flashVars['viewer_id'] + "\n");
+			textDescriptions.appendText("sid = " + _flashVars['sid'] + "\n");
+			textDescriptions.appendText("secret = " + _flashVars['secret'] + "\n");
 			
 			settingsBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent){
 				_VK.callMethod("showSettingsBox", 256);

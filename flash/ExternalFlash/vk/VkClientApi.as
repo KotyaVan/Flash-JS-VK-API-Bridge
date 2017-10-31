@@ -6,7 +6,6 @@
 		
 		public function VkClientApi(dispatchFunction:Function)
 		{
-			// constructor code
 			_dispatchFunction = dispatchFunction;
 		}
 		

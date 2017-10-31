@@ -6,7 +6,6 @@
 
 		public function VkMethods(vkMethodSendParams:Array)
 		{
-			// constructor code
 			_vkMethodSendParams = vkMethodSendParams;
 		}
 

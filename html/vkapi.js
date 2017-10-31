@@ -44,71 +44,30 @@ function clientAPI(methodName, methodParams){
   }
 }
 
-// Объект, ключом которого будет название событие, значением - ссылка на функцию, которая обрабатывает событие
-// При регистрировании нескольких функции на одно событие в JS, срабатывать будет только последняя.
-// Поэтому важно не допустить, чтобы слушатель на событие, которые уже есть, регистрировался еще раз.
-// При передаче информации о событии во флэш, в нем, о событии будет получать инфрмацию каждый подписавшийся слушатель
-// Если названия события будет переданно с ошибкой, то вк на это никак не отреагирует. Стоит обращать внимание на это.
-// Во flash будут созданы констаны с названиями, но все равно это не защитит от возможности ошибок, т.к проверки на правильности не будет
-var clientAPICallBackFunction = {};
-// Считает кол-во, сколько было добавленно слушателей из flash. Чтобы, когда из flash начнут отписываться от событий,
-// в JS отписка от события произошла в только случае, если это был последнии отписавшийся слушатель
-// Ключ - название события, значения - кол-во подписок.
-var clientAPICallBackCounter = {};
-// 
+
+// В данной модификации удалены варианты с счетчиком уже слушающих событий. Т.к теперь все это реализовано во флэш, и флэш попросит
+// подписаться JS на событие, только в том случае, если оно первое во флэш, и удалить, если оно было последнее. 
+// В любом случае, вы можете продолжать использовать старую конструкцию, с счетчиками слушателей, - они будут работать.
+// С помощью нее можно убедиться, что JS слушатель на событие ставиться один раз в то время, как во флэше можкт быть три слушателя на это событие
+var clientAPICallBackFunction = {}; //Записываем ссылку на функцию, которая обрабатывает событие. (Событие - ключ) Только для того, чтобы потом ее удалить
+
 function clientAPICallBackControl(methodName, controlType){
-  // Если vk Api не было инициализировано, то слушатель не будет прикреплен. А flash будет ждать событие. Поэтому в случае
-  // в этом случае, пошлем в функцию сообщение, о том, что, слушатель не был добавлен. 
-  // Вообще, описанное никак недолжно происходить, т.к. флэш библиотека начнет посылать запросы только после инициализации Vk API. 
-  // if(!apiReady){
-  //   // 
-  //   var dataObj = {}; // Объект, которые будет передан во flash
-  //   dataObj.callType = "vkClientApiEvent"; // Данные, нужные flash
-  //   dataObj.methodName = methodName;
-  //   dataObj.error = {error_code:1000, error_msg:"Vk API not init in JS, listener not added."};
 
-  //   sendToActionScript(dataObj);
-  //   return;
-  // }
+console.log(methodName, controlType);
+
   if(controlType == "addEventListener"){ // Нужно добавить слушатель
-    // Проверяем, слушается ли уже эти событие
-    if(clientAPICallBackFunction[methodName] == null){ // Если нет
-      // То ставим слушатель
-      // Сколько функция будет принимать аргументов, и какого типа неизвестно. Это зависит от метода.
-      // Поэтому во флэш будет отправлятся массив аргументов arguments, даже если он пустой
-      VK.addCallback(methodName, callBackFunction);
-      console.log(arguments);
-      function callBackFunction() {
-        var dataObj = {}; // Объект, которые будет передан во flash
-        dataObj.callType = "vkClientApiEvent"; // Данные, нужные flash
-        dataObj.methodName = methodName;
-        dataObj.controlType = controlType;
-        dataObj.value = arguments;
-        console.log(arguments);
-        sendToActionScript(dataObj);
-      };
-
-      clientAPICallBackFunction[methodName] = callBackFunction; // Сохраняем сслыку на эту функцию
-      clientAPICallBackCounter[methodName] = 1; //Ставим счетик в одно использование, для чего нужны счетчики было описано выше
-
-    } else {
-      clientAPICallBackCounter[methodName]++; //Добавляем счетчик плюс одно использование
-    }
+  // Сколько функция будет принимать аргументов, и какого типа неизвестно. Это зависит от метода.
+  // Поэтому во флэш будет отправлятся массив аргументов arguments, даже если он пустой
+    VK.addCallback(methodName, callBackFunction);
+    function callBackFunction() {
+      var dataObj = {}; // Объект, которые будет передан во flash
+      dataObj.callType = "vkClientApiEvent"; // Данные, нужные flash
+      dataObj.methodName = methodName;
+      dataObj.value = arguments;
+      sendToActionScript(dataObj);
+    };
+    clientAPICallBackFunction[methodName] = callBackFunction; // Сохраняем сслыку на эту функцию
   } else if (controlType == "removeEventListener"){ //Нужно убрать слушатель
-    if(clientAPICallBackFunction[methodName] != null){ //Есть ли слушатель на такое событие есть
-      // Уменьшаем счетчик использования
-      clientAPICallBackCounter[methodName]--;
-      // Смотрим, используется ли еще 
-      if(clientAPICallBackCounter[methodName] == 0){
-        // Если нет, то удаляем
-        VK.removeCallback(methodName, clientAPICallBackFunction[methodName]);
-
-        // Если это было последнее использование то удаляем ключи - значения из объектов
-        delete clientAPICallBackFunction[methodName];
-        delete clientAPICallBackCounter[methodName];
-      }
-    } else {
-      // Такое событие не слушается
-    }
+    VK.removeCallback(methodName, clientAPICallBackFunction[methodName]);
   }
 }

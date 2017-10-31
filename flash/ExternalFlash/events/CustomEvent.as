@@ -26,7 +26,7 @@
 		public static const ON_INSTALL_PUSH_SUCCESS:String = "onInstallPushSuccess";
 		//Констатанта библиотеки. 
 		//Используются при прослушивания информации о окончании инициализации Ei. Инициализация можеть быть не обязательно успешной.
-		public static const ON_EI_INIT_END:String = "onEiInitEnd";
+		public static const ON_EI_INIT_END:String = "onExternalInterfaceInitializationEnd";
 
 		public function CustomEvent(type:String, params:Object, bubbles:Boolean=false, cancelable:Boolean=false) {
 			// Вызываю родительский класс
