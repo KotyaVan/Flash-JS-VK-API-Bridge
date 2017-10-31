@@ -11,9 +11,11 @@
 		
 		private var _vkMethodCallRegister:Array = new Array();//Массив, содержит список запросов, которые были сделаны, но ответа не получили (ещё). Заносяться туда перед передачей данных в
 		//JS, и удаляются после получения и вызова callback функции.
+		private var _vkClientEventRegister:Array = new Array();//Массив, содержит в себе объекты. Значения объекта - имя события, ссылка на слушающую функцию. Необходим для того, чтобы не подписываться в JS
+		//на событие, которое уже прослушиватеся, и не отписываться от события, которое слушают другие функции
 		private var _vkClientApiEvent:Object = new Object();//Объект, ключи которого события VK, на которые подписывается флэшка. Создан, с целью того, чтобы несколько раз не просить JS
 		//подписаться на одно и тоже событие
-						
+		
 		public function APIConnection()
 		{
 			_eic = new ExtIntClass(_vkMethodCallRegister, dispatchFunction);
@@ -57,17 +59,55 @@
 		{
 			super.addEventListener(type, listener);
 			
-			//Если во flash добавляются несколько слушателей на одно событие с одной и тои же функцией обработчиком, то при событии функция будет срабатывать только один раз. И чтобы в функцию перестали приходить события,
-			//необходимо отвязаться один раз, а не столько, сколько раз подписывался. Поэтому, если слушатель события с такой функцией обработчика уже зарегестрирован, НЕ нужно сообщать об добавлении нового слушателя JS, 
-			//чтобы он не повышал счетчик слушающих события во флэше функции. Смотри реализацию и описания функции clientAPICallBackControl() в JS. 
-			if(_vkClientApiEvent[type] == listener){
-				//
+			//Если подписывается на события этой библиотеки, данные в JS отправлян не нужно
+			if(type == CustomEvent.ON_EI_INIT_END){
 				return;
 			}
-			//Слушателя с такой функцией нет
-			_vkClientApiEvent[type] = listener;
-			//Тут можно было бы полностью реализовать, что реализовано в JS в функции clientAPICallBackControl() - чтобы JS не подписывался на те события, на которые уже подписался
-			//И это было бы проще реализовывать и это, наверное, было бы лучшем решением.
+			
+/*			//Если во flash добавляются несколько слушателей на одно событие с одной и тои же функцией обработчиком, то при событии функция будет срабатывать только один раз. И чтобы в функцию перестали приходить события,
+			//необходимо отвязаться один раз, а не столько, сколько раз подписывался. Поэтому, если слушатель события с такой функцией обработчика уже зарегестрирован, НЕ нужно сообщать об добавлении нового слушателя JS			
+			var eventListenerObj:Object = {eventName:type, listenerFunction:listener};
+			for(var i:int = 0; i < _vkClientEventRegister.length; i++){
+				if((_vkClientEventRegister[i].eventName == eventListenerObj.eventName) && (_vkClientEventRegister[i].listenerFunction == eventListenerObj.listenerFunction)){
+					//Такое событие уже слушается, причем с такой же функией
+					return;
+				}
+				
+				if(_vkClientEventRegister[i].eventName == eventListenerObj.eventName){
+					//Такое событие уже слушается, но с другим функцией обработчика
+					_vkClientEventRegister.push(eventListenerObj);
+					return;
+				}
+			}
+			
+			_vkClientEventRegister.push(eventListenerObj);
+			*/
+			
+			if(_vkClientApiEvent[type] == null)//На такое событие не подписаны
+			{
+				_vkClientApiEvent[type] = [];//Make array
+				
+				_vkClientApiEvent[type].push({eventType:type, eventListener:listener})
+			}
+			else //подписаны
+			{
+				for(var i:int = 0; i < _vkClientApiEvent[type].length; i++)
+				{
+					if(_vkClientApiEvent[type][i].eventListener == listener){
+						//Уже есть
+						return;
+					}
+				}
+				
+				//Если уже на это событие подписаны
+				if(_vkClientApiEvent[type].length > 0){
+					_vkClientApiEvent[type].push({eventType:type, eventListener:listener});
+					return;
+				} else {
+					_vkClientApiEvent[type].push({eventType:type, eventListener:listener});
+				}
+				
+			}
 			
 			var sendParams:Object = new Object();
 			sendParams.methodName = type;
@@ -82,11 +122,50 @@
 		{
 			super.removeEventListener(type, listener);
 			
-			//Проверяем, есть ли ключ. Если нет, выходим из функции. Т.к если данные о удаляении слушателя передатутся в JS, то он уменьшит счетчик слушателей, и может отписаться от события
-			//А во флэщ может оставаться другой обработчик, которые слушает это событие
-			if(_vkClientApiEvent[type] == null) return;
-			//Удаляем ключ - событие и ссылку на функцию слушателя
-			delete _vkClientApiEvent[type];
+			//Если подписывается на события этой библиотеки, данные в JS отправлян не нужно
+			if(type == CustomEvent.ON_EI_INIT_END){
+				return;
+			}
+			
+/*			var eventListenerObj:Object = {eventName:type, listenerFunction:listener};
+			var eventListenersCount:int = 0;
+			var eventListenerWas:Boolean;
+			for(var j:int = 0; j < _vkClientEventRegister.length; j++){
+				if((_vkClientEventRegister[j].eventName == eventListenerObj.eventName) && (_vkClientEventRegister[j].listenerFunction == eventListenerObj.listenerFunction)){
+					//
+					_vkClientEventRegister.splice(j, 1);
+					eventListenerWas = true;
+					break;
+				}
+			}
+			
+			for(var i:int = 0; i < _vkClientEventRegister.length; i++){
+				if(_vkClientEventRegister[i].eventName == eventListenerObj.eventName){
+					eventListenersCount++;
+				}
+			}
+						
+			if(eventListenersCount > 0) return;
+			if(!eventListenerWas) return;*/
+			
+			if(_vkClientApiEvent[type] == null){
+				//Таких событии не слушаем
+				return;
+			} else {
+				
+				if(_vkClientApiEvent[type].length == 0) return;
+				
+				for(var i:int = 0; i < _vkClientApiEvent[type].length; i++)
+				{
+					if(_vkClientApiEvent[type][i].eventListener == listener)
+					{
+						_vkClientApiEvent[type].splice(i, 1);
+					}
+				}
+				
+				//throw new Error(_vkClientApiEvent[type].length);
+				if(_vkClientApiEvent[type].length > 0) return;
+			}
 			
 			var sendParams:Object = new Object();
 			sendParams.methodName = type;

@@ -22,7 +22,7 @@
 		private var userDataGet:VKButton = new VKButton("users.get");
 		private var addEvListOnWindowBlur:VKButton = new VKButton("Доб. слуш. onSettingsChangedEvent");
 		private var removeEvListOnWindowBlur:VKButton = new VKButton("Уд. слуш. onSettingsChangedEvent");
-
+		
 		public function ExtIntProf(){
 		
 			//Настройка элментов, которые будут отображаться на сцене
@@ -111,6 +111,11 @@
         	textDescriptions.appendText("viewer_id = " + _flashVars['viewer_id'] + "\n");
         	textDescriptions.appendText("sid = " + _flashVars['sid'] + "\n");
         	textDescriptions.appendText("secret = " + _flashVars['secret'] + "\n");
+			
+			_VK.addEventListener("onSettingsChanged", function(event:CustomEvent){
+				 textDescriptions.appendText("Anonum Listener" + event.params[0]);
+				 _VK.removeEventListener("onSettingsChanged", arguments.callee);
+			});
 			
 			settingsBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent){
 				_VK.callMethod("showSettingsBox", 256);
